@@ -1,4 +1,5 @@
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 
 def full_network(params):
@@ -43,7 +44,7 @@ def full_network(params):
         Theta = sindy_library_tf_order2(z, dz, latent_dim, poly_order, include_sine)
 
     if params['coefficient_initialization'] == 'xavier':
-        sindy_coefficients = tf.get_variable('sindy_coefficients', shape=[library_dim,latent_dim], initializer=tf.contrib.layers.xavier_initializer())
+        sindy_coefficients = tf.get_variable('sindy_coefficients', shape=[library_dim,latent_dim], initializer=tf.keras.initializers.GlorotUniform())
     elif params['coefficient_initialization'] == 'specified':
         sindy_coefficients = tf.get_variable('sindy_coefficients', initializer=params['init_coefficients'])
     elif params['coefficient_initialization'] == 'constant':
@@ -192,7 +193,7 @@ def build_network_layers(input, input_dim, output_dim, widths, activation, name)
     last_width=input_dim
     for i,n_units in enumerate(widths):
         W = tf.get_variable(name+'_W'+str(i), shape=[last_width,n_units],
-            initializer=tf.contrib.layers.xavier_initializer())
+            initializer=tf.keras.initializers.GlorotUniform())
         b = tf.get_variable(name+'_b'+str(i), shape=[n_units],
             initializer=tf.constant_initializer(0.0))
         input = tf.matmul(input, W) + b
@@ -202,7 +203,7 @@ def build_network_layers(input, input_dim, output_dim, widths, activation, name)
         weights.append(W)
         biases.append(b)
     W = tf.get_variable(name+'_W'+str(len(widths)), shape=[last_width,output_dim],
-        initializer=tf.contrib.layers.xavier_initializer())
+        initializer=tf.keras.initializers.GlorotUniform())
     b = tf.get_variable(name+'_b'+str(len(widths)), shape=[output_dim],
         initializer=tf.constant_initializer(0.0))
     input = tf.matmul(input,W) + b

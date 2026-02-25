@@ -4,6 +4,9 @@ from scipy.special import legendre, chebyt
 import sys
 sys.path.append('../../src')
 from sindy_utils import library_size
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
 
 
 def get_lorenz_data(n_ics, noise_strength=0):
@@ -182,3 +185,62 @@ def generate_lorenz_data(ics, t, n_points, linear=True, normalization=None,
     data['sindy_coefficients'] = sindy_coefficients.astype(np.float32)
 
     return data
+
+if __name__ == "__main__":
+
+    n_ics = 1
+
+    ic_means = np.array([0,0,25])
+    ic_widths = np.array([36,48,41])
+
+    # training data
+    t = np.arange(0, 50, .002)
+    ics = np.random.rand(n_ics, 3)[0]-.5 + ic_means
+    z, dz, ddz = simulate_lorenz(ics, t, sigma=10., beta=8/3, rho=28.)
+
+    fig = plt.figure()
+    gs = gridspec.GridSpec(3,2, figure=fig)
+    ax3d = fig.add_subplot(gs[:, 0], projection='3d')
+    axlist = [fig.add_subplot(gs[i,1]) for i in range(3)]
+
+    ax3d.plot(z[:,0], z[:,1], z[:,2])
+    ax3d.set_xlabel(rf'$z_0$')
+    ax3d.set_ylabel(rf'$z_1$')
+    ax3d.set_zlabel(rf'$z_2$')
+
+    for i in range(len(axlist)):
+        axlist[i].plot(t, z[:,i])
+        axlist[i].grid()
+        axlist[i].set_xlabel(r'$t$')
+        axlist[i].set_ylabel(rf'$z_{i}$')
+
+    fig.set_size_inches([10,7])
+    fig.subplots_adjust(hspace=0.3, wspace=0.4)
+    fig.savefig('lorenz.pdf', bbox_inches='tight')
+
+    fig.clf()
+
+    # Plotting delayed coordinates
+    tau = 1
+    a = np.vstack((z[:-tau*2,0], z[tau:-tau,0], z[tau*2:,0]))
+    tstack = np.vstack((t[:-tau*2], t[tau:-tau], t[tau*2:]))
+    fig = plt.figure()
+    gs = gridspec.GridSpec(3,2, figure=fig)
+    ax3d = fig.add_subplot(gs[:, 0], projection='3d')
+    axlist = [fig.add_subplot(gs[i,1]) for i in range(3)]
+
+    ax3d.plot(a[0,:], a[1,:], a[2,:])
+    ax3d.set_xlabel(rf'$z_0(t)$')
+    ax3d.set_ylabel(rf'$z_0(t+\tau)$')
+    ax3d.set_zlabel(rf'$z_0(t+2\tau)$')
+    
+    lbllist = [r'$z_0(t)$', r'$z_0(t+\tau)$',r'$z_0(t+2\tau)$']
+    for i in range(len(axlist)):
+        axlist[i].plot(tstack[i,:], a[i,:])
+        axlist[i].grid()
+        axlist[i].set_xlabel(r'$t$')
+        axlist[i].set_ylabel(lbllist[i])
+
+    fig.set_size_inches([10,7])
+    fig.subplots_adjust(hspace=0.3, wspace=0.4)
+    fig.savefig('lorenz-delayed.pdf', bbox_inches='tight')
