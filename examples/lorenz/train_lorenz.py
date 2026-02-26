@@ -74,7 +74,6 @@ params['loss_weight_sindy_regularization'] = 1e-5
 
 params['activation'] = 'sigmoid'
 params['widths'] = [64,32]
-# params['widths'] = [32,16]
 
 
 # training parameters
@@ -89,14 +88,13 @@ params['print_progress'] = True
 params['print_frequency'] = 100
 
 # training time cutoffs
-params['max_epochs'] = 5001
+params['max_epochs'] = 10001
 params['refinement_epochs'] = 1001
 
 
-# # Run training experiments
+# Run training experiments
 
-
-num_experiments = 1
+num_experiments = 10
 df = pd.DataFrame()
 for i in range(num_experiments):
     print('EXPERIMENT %d' % i)
